@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Rate Calculator</title>
+</head>
+<body>
+
+    <h1>Tax Rate Calculator</h1>
+    <form>
+
+        <label for="startingIsland">Starting Island:</label><br>
+        <select id="startingIsland" required onchange="updateSellingPrice()">
+            <option value="Sameria">Sameria</option>
+            <option value="Frostmill Island">Frostmill Island</option>
+            <option value="Palo Town">Palo Town</option>
+            <option value="Ravenna">Ravenna</option>
+            <option value="Redwake">Redwake</option>
+            <option value="Sailor's Lodge">Sailor's Lodge</option>
+            <option value="Shell Island">Shell Island</option>
+            <option value="Lerochos">Lerochos</option>
+        </select><br><br>
+
+        <label for="endingIsland">Ending Island:</label><br>
+        <select id="endingIsland" required onchange="updateSellingPrice()">
+            <option value="Frostmill Island">Frostmill Island</option>
+            <option value="Palo Town">Palo Town</option>
+            <option value="Ravenna">Ravenna</option>
+            <option value="Redwake">Redwake</option>
+            <option value="Sailor's Lodge">Sailor's Lodge</option>
+            <option value="Shell Island">Shell Island</option>
+            <option value="Sameria">Sameria</option>
+            <option value="Lerochos">Lerochos</option>
+        </select><br><br>
+
+        <h3 id="sellingPriceDisplay">Selling Price: </h3>
+
+        <label>Stealing:</label><br>
+        <label>
+            <input type="radio" name="stealing" value="yes" onchange="updateSellingPrice()"> Yes
+        </label>
+        <label>
+            <input type="radio" name="stealing" value="no" onchange="updateSellingPrice()" checked> No
+        </label><br><br>
+
+        <label for="runners">Runners:</label><br>
+        <input type="number" id="runners" required><br><br>
+
+        <label for="cargoPerRunner">Cargo per Runner:</label><br>
+        <input type="number" id="cargoPerRunner" required><br><br>
+
+        <label for="targetTax">Target Tax Revenue:</label><br>
+        <input type="number" id="targetTax" required><br><br>
+
+        <button type="button" onclick="calculateTaxRate()">Calculate Tax Rate</button>
+    </form>
+
+    <h2 id="result"></h2>
+
+    <script>
+        function calculateSellingPrice(startingIsland, endingIsland) {
+            const prices = {
+                "Sameria": 70,
+                "Frostmill Island": {
+                    "Palo Town": 13,
+                    "Ravenna": 44,
+                    "Redwake": 13,
+                    "Sailor's Lodge": 32,
+                    "Shell Island": 29,
+                    "Sameria": 70
+                },
+                "Palo Town": {
+                    "Frostmill Island": 13,
+                    "Ravenna": 34,
+                    "Redwake": 14,
+                    "Sailor's Lodge": 12,
+                    "Shell Island": 31,
+                    "Sameria": 70,
+                    "Lerochos": 25
+                },
+                "Ravenna": {
+                    "Frostmill Island": 44,
+                    "Palo Town": 35,
+                    "Redwake": 49,
+                    "Sailor's Lodge": 33,
+                    "Shell Island": 42,
+                    "Sameria": 70,
+                    "Lerochos": 60
+                },
+                "Redwake": {
+                    "Frostmill Island": 13,
+                    "Palo Town": 14,
+                    "Ravenna": 49,
+                    "Sailor's Lodge": 33,
+                    "Shell Island": 42,
+                    "Sameria": 70,
+                    "Lerochos": 15
+                },
+                "Sailor's Lodge": {
+                    "Frostmill Island": 32,
+                    "Palo Town": 22,
+                    "Ravenna": 12,
+                    "Redwake": 33,
+                    "Shell Island": 26,
+                    "Sameria": 70,
+                    "Lerochos": 48
+                },
+                "Shell Island": {
+                    "Frostmill Island": 29,
+                    "Palo Town": 31,
+                    "Ravenna": 31,
+                    "Redwake": 42,
+                    "Sailor's Lodge": 26,
+                    "Sameria": 70,
+                    "Lerochos": 44
+                },
+                "Lerochos": {
+                    "Ravenna" : 60,
+                    "Sailor's Lodge": 48,
+                    "Palo Town": 25,
+                    "Redwake": 15,
+                    "Shell Island": 44,
+                    "Sameria": 70
+                }
+            };
+
+            if (startingIsland === "Sameria") return prices["Sameria"];
+            return prices[startingIsland][endingIsland];
+        }
+
+        function updateSellingPrice() {
+            const startingIsland = document.getElementById("startingIsland").value;
+            const endingIsland = document.getElementById("endingIsland").value;
+            const sellingPrice = calculateSellingPrice(startingIsland, endingIsland);
+
+            const stealing = document.querySelector('input[name="stealing"]:checked');
+            let csell = sellingPrice;
+
+            if (stealing && stealing.value === 'no') {
+                csell += 50;
+            }
+
+            document.getElementById("sellingPriceDisplay").innerText = "Selling Price: " + csell;
+        }
+
+        function calculateTaxRate() {
+            const crunner = parseInt(document.getElementById("runners").value);
+            const camount = parseInt(document.getElementById("cargoPerRunner").value);
+            const caim = parseInt(document.getElementById("targetTax").value);
+            
+            const startingIsland = document.getElementById("startingIsland").value;
+            const endingIsland = document.getElementById("endingIsland").value;
+
+            const sellingPrice = calculateSellingPrice(startingIsland, endingIsland);
+            const stealing = document.querySelector('input[name="stealing"]:checked');
+
+            let csell = sellingPrice;
+            let cbuy = 0;
+
+            if (stealing && stealing.value === 'no') {
+                csell += 50;
+                cbuy = 50;
+            }
+
+            let ctax = 1;
+            let crevenue = (csell - cbuy) * (crunner * camount) * (ctax / 100); 
+
+            while (crevenue < caim) {
+                ctax += 1;
+                crevenue = (csell - cbuy) * (crunner * camount) * (ctax / 100);
+            }
+
+            document.getElementById("result").innerText = "Tax rate needed for target revenue: " + ctax + "%\nStarting Island: " + startingIsland + "\nEnding Island: " + endingIsland;
+        }
+    </script>
+
+</body>
+</html>
